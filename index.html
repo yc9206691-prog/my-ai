@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>Karen AI</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/material-icons@1.13.12/iconfont/round.css" media="print" onload="this.media='all';this.onload=null" crossorigin="anonymous"/>
+<style>
+/* ── Reset ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;height:100dvh;width:100%;overflow:hidden}
+body{font-family:'Inter',sans-serif;background:#090c18;color:#f0f4ff;font-size:14px;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(0,200,255,.2);border-radius:3px}
+
+/* ── Variables ── */
+:root{
+  --c:#00d4ff;
+  --cr:0,212,255;
+  --pu:#9c27b0;
+  --gn:#22c55e;
+  --bg:#090c18;
+  --bg2:#0d1121;
+  --bg3:#131827;
+  --bd:rgba(255,255,255,.07);
+  --bd2:rgba(255,255,255,.12);
+  --t1:rgba(255,255,255,.85);
+  --t2:rgba(255,255,255,.5);
+  --t3:rgba(255,255,255,.3);
+}
+
+/* ── Background ── */
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 60% 50% at 90% 95%,rgba(100,20,60,.4) 0%,transparent 65%),
+    radial-gradient(ellipse 40% 35% at 10% 5%,rgba(0,212,255,.04) 0%,transparent 65%),
+    #090c18}
+
+/* ── Layout ── */
+#app{display:flex;height:100vh;height:100dvh;width:100vw;position:relative;z-index:1;overflow:hidden}
+#main{flex:1;display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;min-width:0}
+
+/* ── Sidebar overlay ── */
+#sbo{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .3s}
+#sbo.show{opacity:1;pointer-events:all}
+
+/* ── Sidebar ── */
+#sb{position:fixed;top:0;left:0;width:268px;height:100vh;height:100dvh;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;z-index:50;transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+#sb.open{transform:translateX(0)}
+
+.sb-top{display:flex;align-items:center;gap:10px;padding:16px 14px 13px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.sb-logo{width:34px;height:34px;border-radius:9px;background:var(--c);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 12px rgba(var(--cr),.35)}
+.sb-logo .mi{font-size:19px;color:#090c18}
+.sb-title{font-size:17px;font-weight:800;color:#fff;flex:1}
+.sb-title span{color:var(--c)}
+.sb-close-btn{width:28px;height:28px;border:none;background:transparent;color:var(--t2);cursor:pointer;border-radius:7px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.sb-close-btn:hover{background:rgba(255,255,255,.07);color:#fff}
+.sb-close-btn .mi{font-size:18px}
+
+.sb-body{flex:1;overflow-y:auto;padding:10px}
+.new-btn{width:100%;padding:11px 14px;border-radius:11px;border:1px solid rgba(var(--cr),.25);background:rgba(var(--cr),.06);color:var(--c);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;transition:all .2s;margin-bottom:12px}
+.new-btn:hover{background:rgba(var(--cr),.12);border-color:rgba(var(--cr),.4)}
+.new-btn .mi{font-size:18px}
+
+.sect-lbl{font-size:10px;font-weight:700;color:var(--t3);letter-spacing:1.2px;text-transform:uppercase;padding:4px 4px 7px}
+.chat-item{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:9px;cursor:pointer;color:var(--t2);font-size:12.5px;margin-bottom:2px;transition:all .14s;position:relative}
+.chat-item:hover{background:var(--bg3);color:#fff}
+.chat-item.active{background:var(--bg3);color:#fff;box-shadow:inset 2px 0 0 var(--c)}
+.chat-item .ci-ic .mi{font-size:16px;color:var(--c)}
+.chat-item .ci-t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-item .ci-del{opacity:0;transition:opacity .14s;display:flex;align-items:center}
+.chat-item:hover .ci-del{opacity:1}
+.chat-item .ci-del .mi{font-size:15px;color:var(--t3)}
+.chat-item .ci-del:hover .mi{color:#ff6060}
+
+.sb-bot{border-top:1px solid var(--bd);padding:8px;flex-shrink:0}
+.sb-btn{width:100%;padding:10px 12px;border-radius:9px;border:none;background:transparent;color:var(--t3);cursor:pointer;display:flex;align-items:center;gap:8px;font-family:'Inter',sans-serif;font-size:12.5px;transition:all .14s;text-align:left}
+.sb-btn:hover{background:var(--bg3);color:var(--t2)}
+.sb-btn .mi{font-size:17px}
+
+/* ── Header ── */
+#hdr{height:60px;display:flex;align-items:center;gap:10px;padding:0 14px;border-bottom:1px solid var(--bd);background:rgba(9,12,24,.88);backdrop-filter:blur(16px);flex-shrink:0;z-index:10}
+.icon-btn{width:34px;height:34px;border:none;background:transparent;color:var(--t2);cursor:pointer;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.icon-btn:hover{background:rgba(255,255,255,.07);color:#fff}
+.icon-btn .mi{font-size:21px}
+.ai-badge{width:38px;height:38px;border-radius:10px;background:var(--c);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 0 13px rgba(var(--cr),.3)}
+.ai-badge .mi{font-size:21px;color:#090c18}
+.hdr-info{flex:1;min-width:0}
+.hdr-name{font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-status{display:flex;align-items:center;gap:4px;margin-top:1px}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--gn);box-shadow:0 0 6px rgba(34,197,94,.6)}
+.status-txt{font-size:10.5px;font-weight:600;color:var(--gn);letter-spacing:.5px}
+.voice-hdr-btn{color:rgba(var(--cr),.65)!important}
+.voice-hdr-btn.vactive{color:var(--c)!important;background:rgba(var(--cr),.1)!important}
+
+/* ── Chat area ── */
+#chat{flex:1;overflow-y:auto;padding:16px 14px 8px;display:flex;flex-direction:column;gap:3px;scroll-behavior:smooth;min-height:0}
+
+/* ── Empty screen ── */
+#empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:36px 20px;text-align:center}
+.em-orb{width:66px;height:66px;border-radius:17px;background:var(--c);display:flex;align-items:center;justify-content:center;box-shadow:0 0 28px rgba(var(--cr),.28);animation:orb-fl 3s ease-in-out infinite}
+@keyframes orb-fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.em-orb .mi{font-size:31px;color:#090c18}
+.em-h{font-size:20px;font-weight:800;color:#fff}
+.em-n{font-size:13.5px;font-weight:700;color:var(--c);margin-top:-5px}
+.em-s{font-size:13px;color:var(--t2);line-height:1.6;max-width:270px}
+.em-vc{display:flex;align-items:center;gap:7px;padding:9px 15px;border-radius:28px;background:rgba(var(--cr),.07);border:1px solid rgba(var(--cr),.18);color:var(--c);font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;margin-top:2px}
+.em-vc:hover{background:rgba(var(--cr),.14)}
+.em-vc .mi{font-size:17px}
+
+/* ── Messages ── */
+.msg-grp{display:flex;flex-direction:column;animation:msg-in .25s ease}
+@keyframes msg-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.msg-row{display:flex;align-items:flex-end;gap:8px}
+.msg-row.user{flex-direction:row-reverse;align-self:flex-end;max-width:85%}
+.msg-row.ai{align-self:flex-start;max-width:91%}
+.av-u{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#5b21b6,#9333ea);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.av-k{width:30px;height:30px;border-radius:50%;background:var(--c);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;color:#090c18;flex-shrink:0;box-shadow:0 0 9px rgba(var(--cr),.3)}
+.bubble{border-radius:17px;padding:12px 15px;word-break:break-word;font-size:14.5px;position:relative;max-width:100%}
+.bubble.user{background:#1c1940;border:1px solid rgba(147,51,234,.25);border-bottom-right-radius:3px;color:#f0f4ff;line-height:1.65;white-space:pre-wrap}
+.bubble.ai{background:#111824;border:1px solid rgba(255,255,255,.09);border-bottom-left-radius:3px;color:#e8f0ff}
+.bubble img{max-width:100%;border-radius:9px;margin:0 0 7px;display:block}
+.img-stamp{background:rgba(var(--cr),.05);border:1px dashed rgba(var(--cr),.18);border-radius:7px;padding:6px 11px;margin-bottom:7px;font-size:11.5px;color:rgba(var(--cr),.6);display:flex;align-items:center;gap:5px}
+.img-stamp .mi{font-size:14px}
+
+/* Plain text styles */
+.rp{font-size:14.5px;line-height:1.75;color:#dde8ff;margin:0 0 9px}
+.rp:last-child{margin-bottom:0}
+.rh{font-size:14.5px;font-weight:700;color:#fff;margin:0 0 5px;line-height:1.4}
+.rs{list-style:none;padding:0;margin:0 0 9px;display:flex;flex-direction:column;gap:7px}
+.rs-i{display:flex;gap:9px;align-items:flex-start}
+.rs-n{min-width:23px;height:23px;border-radius:50%;background:var(--c);color:#090c18;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.rs-t{font-size:14.5px;line-height:1.7;color:#dde8ff}
+.rc{background:#080c16;border:1px solid rgba(255,255,255,.09);border-radius:9px;padding:12px;margin:7px 0;font-family:'Courier New',monospace;font-size:12.5px;color:#7cc8f8;overflow-x:auto;line-height:1.6;white-space:pre-wrap}
+
+.tok-row{display:flex;align-items:center;gap:3px;margin-top:8px;padding-top:7px;border-top:1px solid rgba(255,255,255,.06);font-size:10.5px;color:var(--t3)}
+.msg-acts{display:flex;gap:4px;margin-top:6px;opacity:0;transition:opacity .16s;flex-wrap:wrap}
+.msg-grp:hover .msg-acts{opacity:1}
+.msg-acts.ua{justify-content:flex-end;padding-right:38px}
+.msg-acts.ka{justify-content:flex-start;padding-left:38px}
+.act{width:30px;height:30px;border-radius:7px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .13s}
+.act .mi{font-size:14px}
+.act:hover{background:rgba(var(--cr),.09);border-color:rgba(var(--cr),.28);color:var(--c)}
+
+/* ── Typing indicator ── */
+#typr-wrap{padding:0 14px 5px}
+#typr{display:none;align-items:flex-end;gap:8px;align-self:flex-start}
+#typr.show{display:flex}
+.typr-bub{background:#111824;border:1px solid rgba(255,255,255,.09);border-radius:17px;border-bottom-left-radius:3px;padding:10px 14px;display:flex;gap:5px;align-items:center}
+.td{width:6px;height:6px;border-radius:50%;background:var(--c);animation:tp 1.4s ease-in-out infinite}
+.td:nth-child(2){animation-delay:.22s}.td:nth-child(3){animation-delay:.44s}
+@keyframes tp{0%,100%{transform:scale(.35);opacity:.35}50%{transform:scale(1);opacity:1}}
+
+/* ── Suggestion chips ── */
+#chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 0 7px}
+.chip{padding:6px 12px;border-radius:18px;border:1px solid rgba(var(--cr),.18);background:rgba(var(--cr),.04);color:var(--t2);font-size:12px;cursor:pointer;transition:all .16s;font-family:'Inter',sans-serif}
+.chip:hover{border-color:rgba(var(--cr),.45);color:var(--c);background:rgba(var(--cr),.09)}
+
+/* ── Input ── */
+#inp-wrap{padding:7px 12px max(10px,env(safe-area-inset-bottom));background:rgba(9,12,24,.92);backdrop-filter:blur(16px);border-top:1px solid var(--bd);flex-shrink:0}
+#prev-strip{display:flex;gap:6px;padding:0 2px 7px;flex-wrap:wrap}
+.prev-item{position:relative;width:50px;height:50px;flex-shrink:0}
+.prev-item img{width:50px;height:50px;object-fit:cover;border-radius:8px;border:1px solid rgba(var(--cr),.28)}
+.prev-rm{position:absolute;top:-4px;right:-4px;width:15px;height:15px;border-radius:50%;background:#cc3333;color:#fff;font-size:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;font-weight:700;line-height:1}
+#vrec-bar{display:none;align-items:center;gap:7px;padding:3px 8px 7px;color:#f87171;font-size:12px}
+#vrec-bar.show{display:flex}
+.vrec-dot{width:8px;height:8px;border-radius:50%;background:#ef4444;animation:vrd .85s ease-in-out infinite;flex-shrink:0}
+@keyframes vrd{0%,100%{transform:scale(1)}50%{transform:scale(1.6)}}
+.input-box{display:flex;align-items:center;gap:5px;padding:6px 8px 6px 11px;background:#0c1020;border:1px solid rgba(255,255,255,.08);border-radius:21px;transition:border-color .2s}
+.input-box:focus-within{border-color:rgba(var(--cr),.26)}
+.tb{width:27px;height:27px;border:none;background:transparent;color:rgba(255,255,255,.38);cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:6px;transition:all .13s;flex-shrink:0}
+.tb .mi{font-size:19px}
+.tb:hover{color:var(--c);background:rgba(var(--cr),.08)}
+.tb.on{color:var(--c);background:rgba(var(--cr),.09)}
+.tb.vc-color{color:rgba(var(--cr),.6)}
+#minp{flex:1;background:transparent;border:none;outline:none;color:#f0f4ff;font-family:'Inter',sans-serif;font-size:14px;resize:none;min-height:22px;max-height:155px;line-height:1.5;padding:0}
+#minp::placeholder{color:rgba(255,255,255,.25)}
+.send-btn{width:40px;height:40px;border-radius:12px;border:none;background:linear-gradient(135deg,#00d4ff,#009ac0);color:#090c18;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;box-shadow:0 0 14px rgba(var(--cr),.3)}
+.send-btn:hover{transform:scale(1.07);box-shadow:0 0 22px rgba(var(--cr),.45)}
+.send-btn:active{transform:scale(.95)}
+.send-btn .mi{font-size:18px}
+.send-btn.ld .mi{animation:spin .8s linear infinite}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.disc-txt{text-align:center;font-size:10.5px;color:var(--t3);padding:5px 0 1px}
+
+/* ════════════════════════════════════════
+   VOICE OVERLAY
+════════════════════════════════════════ */
+#vov{
+  position:fixed;inset:0;z-index:600;
+  background:linear-gradient(160deg,#060912 0%,#0c1020 45%,#09061a 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .32s ease;
+}
+#vov.show{opacity:1;pointer-events:all}
+#vov::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 55% 55% at 50% 50%,rgba(var(--cr),.04) 0%,transparent 70%),radial-gradient(ellipse 35% 35% at 15% 85%,rgba(156,39,176,.05) 0%,transparent 60%);pointer-events:none}
+
+.vov-close{position:absolute;top:18px;right:18px;width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:rgba(255,255,255,.55);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;z-index:2}
+.vov-close:hover{background:rgba(255,255,255,.1);color:#fff}
+.vov-close .mi{font-size:19px}
+.vov-label{font-size:12px;font-weight:700;letter-spacing:1.8px;color:rgba(255,255,255,.35);text-transform:uppercase;margin-bottom:26px;z-index:2}
+
+/* Orb */
+.vov-orb-wrap{position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:30px;z-index:2}
+.vring{position:absolute;border-radius:50%;border:1.5px solid rgba(var(--cr),.1);animation:vr-idle 3.2s ease-in-out infinite}
+.vring:nth-child(1){width:174px;height:174px}
+.vring:nth-child(2){width:226px;height:226px;animation-delay:.45s;border-color:rgba(var(--cr),.06)}
+.vring:nth-child(3){width:285px;height:285px;animation-delay:.9s;border-color:rgba(var(--cr),.03)}
+@keyframes vr-idle{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.04);opacity:.45}}
+
+#vov.vlistening .vring{animation:vr-listen 1.05s ease-out infinite}
+#vov.vlistening .vring:nth-child(2){animation-delay:.17s}
+#vov.vlistening .vring:nth-child(3){animation-delay:.34s}
+@keyframes vr-listen{0%{transform:scale(1);opacity:.85}100%{transform:scale(1.28);opacity:0}}
+#vov.vlistening .vring:nth-child(1){border-color:rgba(var(--cr),.58)}
+#vov.vlistening .vring:nth-child(2){border-color:rgba(var(--cr),.3)}
+#vov.vlistening .vring:nth-child(3){border-color:rgba(var(--cr),.12)}
+
+#vov.vspeaking .vring{animation:vr-speak .72s ease-out infinite}
+#vov.vspeaking .vring:nth-child(2){animation-delay:.13s}
+#vov.vspeaking .vring:nth-child(3){animation-delay:.26s}
+@keyframes vr-speak{0%{transform:scale(1);opacity:.85}100%{transform:scale(1.32);opacity:0}}
+#vov.vspeaking .vring:nth-child(1){border-color:rgba(34,197,94,.58)}
+#vov.vspeaking .vring:nth-child(2){border-color:rgba(34,197,94,.28)}
+#vov.vspeaking .vring:nth-child(3){border-color:rgba(34,197,94,.1)}
+
+#vov.vthinking .vring{animation:vr-think 1.8s ease-in-out infinite}
+#vov.vthinking .vring:nth-child(2){animation-delay:.35s}
+#vov.vthinking .vring:nth-child(3){animation-delay:.7s}
+@keyframes vr-think{0%,100%{transform:scale(1);opacity:.55}50%{transform:scale(1.07);opacity:.18}}
+#vov.vthinking .vring:nth-child(1){border-color:rgba(168,85,247,.52)}
+#vov.vthinking .vring:nth-child(2){border-color:rgba(168,85,247,.26)}
+
+.vorb{width:126px;height:126px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;z-index:2;background:radial-gradient(circle at 33% 33%,rgba(var(--cr),.22),rgba(0,70,130,.07));border:2px solid rgba(var(--cr),.32);box-shadow:0 0 38px rgba(var(--cr),.16),inset 0 0 26px rgba(var(--cr),.04);transition:all .35s ease;cursor:pointer}
+#vov.vlistening .vorb{background:radial-gradient(circle at 33% 33%,rgba(var(--cr),.44),rgba(0,110,170,.1));border-color:rgba(var(--cr),.72);box-shadow:0 0 52px rgba(var(--cr),.34),inset 0 0 32px rgba(var(--cr),.07)}
+#vov.vspeaking  .vorb{background:radial-gradient(circle at 33% 33%,rgba(34,197,94,.36),rgba(0,100,50,.08));border-color:rgba(34,197,94,.68);box-shadow:0 0 52px rgba(34,197,94,.28),inset 0 0 32px rgba(34,197,94,.06)}
+#vov.vthinking  .vorb{background:radial-gradient(circle at 33% 33%,rgba(168,85,247,.28),rgba(70,0,140,.07));border-color:rgba(168,85,247,.58);box-shadow:0 0 46px rgba(168,85,247,.24),inset 0 0 28px rgba(168,85,247,.05)}
+.vorb-icon{font-size:44px;color:rgba(255,255,255,.8);transition:color .3s;font-family:'Material Icons Round';font-style:normal}
+#vov.vlistening  .vorb-icon{color:#00d4ff}
+#vov.vspeaking   .vorb-icon{color:#22c55e}
+#vov.vthinking   .vorb-icon{animation:spin .9s linear infinite;color:#a855f7}
+
+/* Wave bars */
+.vwave{display:flex;align-items:center;gap:3px;height:38px;margin-bottom:18px;z-index:2;opacity:0;transition:opacity .28s}
+#vov.vlistening .vwave,#vov.vspeaking .vwave{opacity:1}
+.vbar{width:3px;border-radius:3px;background:var(--c);animation:vbar 1.25s ease-in-out infinite}
+#vov.vspeaking .vbar{background:var(--gn)}
+.vbar:nth-child(1){height:7px;animation-delay:.0s}.vbar:nth-child(2){height:20px;animation-delay:.1s}.vbar:nth-child(3){height:34px;animation-delay:.2s}.vbar:nth-child(4){height:26px;animation-delay:.3s}.vbar:nth-child(5){height:15px;animation-delay:.4s}.vbar:nth-child(6){height:30px;animation-delay:.5s}.vbar:nth-child(7){height:19px;animation-delay:.6s}.vbar:nth-child(8){height:11px;animation-delay:.7s}.vbar:nth-child(9){height:24px;animation-delay:.8s}.vbar:nth-child(10){height:17px;animation-delay:.9s}.vbar:nth-child(11){height:7px;animation-delay:1.0s}
+@keyframes vbar{0%,100%{transform:scaleY(.3);opacity:.38}50%{transform:scaleY(1);opacity:1}}
+
+#vov-status{font-size:15px;font-weight:600;color:rgba(255,255,255,.72);letter-spacing:.3px;margin-bottom:7px;z-index:2;text-align:center;transition:color .3s;min-height:22px}
+#vov.vlistening #vov-status{color:var(--c)}
+#vov.vspeaking  #vov-status{color:var(--gn)}
+#vov.vthinking  #vov-status{color:#a855f7}
+#vov-tx{max-width:320px;text-align:center;font-size:13.5px;color:rgba(255,255,255,.38);line-height:1.6;min-height:42px;padding:0 16px;z-index:2;transition:color .28s}
+#vov-tx.utx{color:rgba(255,255,255,.82)}
+#vov-tx.ktx{color:rgba(var(--cr),.75)}
+
+.vov-btns{display:flex;align-items:center;gap:18px;margin-top:26px;z-index:2}
+.vov-ctrl{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;user-select:none}
+.vov-ci{width:50px;height:50px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;transition:all .18s}
+.vov-ci .mi{font-size:21px;color:rgba(255,255,255,.62)}
+.vov-ctrl:hover .vov-ci{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.26)}
+.vov-ci.muted,.vov-ci.muted-spk{background:rgba(255,70,70,.1);border-color:rgba(255,70,70,.26)}
+.vov-ci.muted .mi,.vov-ci.muted-spk .mi{color:#f87171}
+.vov-lbl{font-size:10.5px;color:rgba(255,255,255,.28);letter-spacing:.5px}
+.vov-end{width:66px;height:66px;border-radius:50%;background:linear-gradient(135deg,#dc2626,#b91c1c);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 0 18px rgba(220,38,38,.35);transition:all .2s}
+.vov-end:hover{transform:scale(1.09);box-shadow:0 0 28px rgba(220,38,38,.52)}
+.vov-end:active{transform:scale(.94)}
+.vov-end .mi{font-size:27px;color:#fff}
+
+/* ════════════════════════════════════════
+   CONFIG MODAL
+════════════════════════════════════════ */
+#cfg-ov{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.66);backdrop-filter:blur(5px);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s}
+#cfg-ov.show{opacity:1;pointer-events:all}
+#cfg-box{width:100%;max-width:520px;background:#131827;border-radius:20px 20px 0 0;display:flex;flex-direction:column;max-height:90vh;animation:cfg-up .3s cubic-bezier(.4,0,.2,1);border:1px solid rgba(255,255,255,.07);border-bottom:none}
+@keyframes cfg-up{from{transform:translateY(100%);opacity:.5}to{transform:translateY(0);opacity:1}}
+.cfg-hd{display:flex;align-items:center;gap:9px;padding:18px 18px 14px;flex-shrink:0}
+.cfg-hd-ic{font-size:19px;color:var(--c)}
+.cfg-hd-t{flex:1;font-size:17px;font-weight:800;color:#fff;letter-spacing:-.2px}
+.cfg-xbtn{width:28px;height:28px;border:none;background:transparent;color:rgba(255,255,255,.45);cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:7px;transition:all .14s}
+.cfg-xbtn:hover{color:#fff;background:rgba(255,255,255,.08)}
+.cfg-xbtn .mi{font-size:19px}
+.cfg-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,.07);padding:0 18px;flex-shrink:0}
+.ctab{flex:1;padding:11px 3px;text-align:center;font-size:12px;font-weight:700;letter-spacing:.9px;color:rgba(255,255,255,.32);cursor:pointer;position:relative;transition:color .16s;border:none;background:transparent;font-family:'Inter',sans-serif}
+.ctab:hover{color:rgba(255,255,255,.58)}.ctab.on{color:var(--c)}
+.ctab.on::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--c);border-radius:2px 2px 0 0}
+.cfg-body{flex:1;overflow-y:auto;padding:20px 18px}
+.tab-pane{display:none}.tab-pane.on{display:block}
+.flbl{font-size:10.5px;font-weight:700;color:rgba(255,255,255,.38);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px;display:block}
+.fi{width:100%;padding:11px 12px;background:#0c111e;border:1px solid rgba(255,255,255,.09);border-radius:11px;color:#f0f4ff;font-family:'Inter',sans-serif;font-size:13.5px;outline:none;transition:border-color .18s;margin-bottom:15px}
+.fi:focus{border-color:rgba(var(--cr),.38)}
+.fi::placeholder{color:rgba(255,255,255,.2)}
+.fi-wrap{position:relative;margin-bottom:15px}
+.fi-wrap .fi{padding-right:42px;margin-bottom:0}
+.eye-btn{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:transparent;border:none;cursor:pointer;color:rgba(255,255,255,.3);display:flex;align-items:center;transition:color .14s}
+.eye-btn:hover{color:var(--c)}
+.eye-btn .mi{font-size:18px}
+.fg{margin-bottom:15px}
+.fsel{width:100%;padding:11px 12px;background:#0c111e;border:1px solid rgba(255,255,255,.09);border-radius:11px;color:#f0f4ff;font-family:'Inter',sans-serif;font-size:13.5px;outline:none;appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff50'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;background-size:19px}
+.fsel option{background:#131827}
+.tr{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.tlbl{font-size:10.5px;font-weight:700;color:rgba(255,255,255,.38);letter-spacing:1px;text-transform:uppercase}
+.tval{font-size:13.5px;font-weight:700;color:var(--c)}
+.rng{width:100%;-webkit-appearance:none;height:3px;background:rgba(255,255,255,.1);border-radius:2px;outline:none;margin-bottom:15px;cursor:pointer}
+.rng::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;background:var(--c);cursor:pointer;box-shadow:0 0 7px rgba(var(--cr),.52)}
+.fta{width:100%;padding:11px 12px;background:#0c111e;border:1px solid rgba(255,255,255,.09);border-radius:11px;color:#f0f4ff;font-family:'Inter',sans-serif;font-size:13px;outline:none;resize:vertical;min-height:110px;line-height:1.6;transition:border-color .18s;margin-bottom:15px}
+.fta:focus{border-color:rgba(var(--cr),.32)}
+.fta::placeholder{color:rgba(255,255,255,.2)}
+.tog-row{display:flex;align-items:center;justify-content:space-between;background:#0c111e;border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:14px;margin-bottom:15px}
+.tog-info .tog-name{font-size:14px;font-weight:600;color:#fff;margin-bottom:2px}
+.tog-info .tog-desc{font-size:11.5px;color:var(--t2)}
+.tog{position:relative;width:48px;height:26px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0;position:absolute}
+.tog-sl{position:absolute;inset:0;border-radius:13px;background:rgba(255,255,255,.14);cursor:pointer;transition:background .2s}
+.tog-sl::before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 2px 5px rgba(0,0,0,.35)}
+.tog input:checked + .tog-sl{background:var(--pu)}
+.tog input:checked + .tog-sl::before{transform:translateX(22px)}
+.chk-row{display:flex;align-items:flex-start;gap:11px;cursor:pointer;margin-bottom:7px;user-select:none}
+.chk-box{width:21px;height:21px;border-radius:5px;border:2px solid var(--c);background:var(--c);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all .14s}
+.chk-box.off{background:transparent;border-color:rgba(255,255,255,.28)}
+.chk-box .mi{font-size:14px;color:#090c18}
+.chk-txt{font-size:13.5px;color:var(--t2);line-height:1.55}
+.src-card{background:#0a1422;border:1px solid rgba(0,150,200,.35);border-radius:13px;padding:16px;margin-bottom:14px}
+.src-card-hd{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.src-card-hd .mi{font-size:18px;color:var(--c)}
+.src-card-nm{font-size:14px;font-weight:700;color:var(--c)}
+.src-card-desc{font-size:12.5px;color:var(--t2);line-height:1.55;margin-bottom:13px}
+.dl-btn{width:100%;padding:12px;border-radius:9px;border:1px solid rgba(var(--cr),.28);background:rgba(var(--cr),.07);color:var(--c);font-family:'Inter',sans-serif;font-size:12.5px;font-weight:700;letter-spacing:.9px;cursor:pointer;transition:all .18s;text-transform:uppercase}
+.dl-btn:hover{background:rgba(var(--cr),.14)}
+.dng-card{background:rgba(80,10,10,.35);border:1px solid rgba(200,50,50,.3);border-radius:13px;padding:16px}
+.dng-hd{display:flex;align-items:center;gap:7px;margin-bottom:13px}
+.dng-hd .mi{font-size:19px;color:#f97316}
+.dng-nm{font-size:14px;font-weight:700;color:#f97316}
+.rst-btn{width:100%;padding:12px;border-radius:9px;border:1px solid rgba(200,50,50,.35);background:rgba(200,40,40,.12);color:#f87171;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:700;letter-spacing:.9px;cursor:pointer;transition:all .18s;text-transform:uppercase}
+.rst-btn:hover{background:rgba(200,40,40,.24)}
+.cfg-ft{display:flex;align-items:center;gap:12px;padding:14px 18px 18px;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;background:#131827}
+.cfg-cancel{flex:1;padding:13px;border-radius:13px;border:none;background:transparent;color:rgba(255,255,255,.4);font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;letter-spacing:.7px;cursor:pointer;transition:all .18s;text-transform:uppercase}
+.cfg-cancel:hover{color:rgba(255,255,255,.65);background:rgba(255,255,255,.04)}
+.cfg-save{flex:2;padding:13px;border-radius:13px;border:none;background:var(--c);color:#090c18;font-family:'Inter',sans-serif;font-size:13.5px;font-weight:800;letter-spacing:.9px;cursor:pointer;transition:all .2s;text-transform:uppercase;box-shadow:0 0 18px rgba(var(--cr),.3)}
+.cfg-save:hover{transform:scale(1.02);box-shadow:0 0 28px rgba(var(--cr),.5)}
+.cfg-save:active{transform:scale(.97)}
+
+/* ── Toast ── */
+#toasts{position:fixed;bottom:86px;right:13px;z-index:900;display:flex;flex-direction:column;gap:7px;pointer-events:none}
+.toast{padding:9px 14px;border-radius:9px;font-size:12.5px;border:1px solid rgba(var(--cr),.2);background:rgba(10,14,25,.97);color:#f0f4ff;backdrop-filter:blur(16px);box-shadow:0 4px 18px rgba(0,0,0,.5);animation:tin .22s ease;max-width:285px;pointer-events:all}
+@keyframes tin{from{opacity:0;transform:translateX(11px)}to{opacity:1;transform:translateX(0)}}
+
+@media(min-width:640px){
+  #sb{position:relative;transform:none}
+  #sbo{display:none !important}
+  #sb-menu-btn{display:none}
+  #cfg-box{border-radius:18px;align-self:center;max-height:86vh;margin:20px}
+  #cfg-ov{align-items:center}
+}
+</style>
+</head>
+<body>
+
+<div id="bg"></div>
+<div id="toasts"></div>
+<input type="file" id="img-in" accept="image/*" multiple style="display:none" onchange="onImgFiles(event)"/>
+
+<!-- ════ VOICE OVERLAY ════ -->
+<div id="vov">
+  <button class="vov-close" onclick="closeVoice()"><span class="mi material-icons-round">close</span></button>
+  <div class="vov-label">KAREN AI — VOICE MODE</div>
+  <div class="vov-orb-wrap">
+    <div class="vring"></div><div class="vring"></div><div class="vring"></div>
+    <div class="vorb" onclick="orbClick()">
+      <span class="vorb-icon material-icons-round" id="vorb-icon">mic</span>
+    </div>
+  </div>
+  <div class="vwave">
+    <div class="vbar"></div><div class="vbar"></div><div class="vbar"></div><div class="vbar"></div><div class="vbar"></div>
+    <div class="vbar"></div><div class="vbar"></div><div class="vbar"></div><div class="vbar"></div><div class="vbar"></div><div class="vbar"></div>
+  </div>
+  <div id="vov-status">Tap the orb to start talking</div>
+  <div id="vov-tx">Say something to Karen…</div>
+  <div class="vov-btns">
+    <div class="vov-ctrl" onclick="toggleVMute()">
+      <div class="vov-ci" id="vmute-ci"><span class="mi material-icons-round" id="vmute-ic">mic</span></div>
+      <div class="vov-lbl">MUTE</div>
+    </div>
+    <button class="vov-end" onclick="closeVoice()"><span class="mi material-icons-round">call_end</span></button>
+    <div class="vov-ctrl" onclick="toggleVSpk()">
+      <div class="vov-ci" id="vspk-ci"><span class="mi material-icons-round" id="vspk-ic">volume_up</span></div>
+      <div class="vov-lbl">SPEAKER</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ CONFIG MODAL ════ -->
+<div id="cfg-ov" onclick="if(event.target===this)closeCfg()">
+  <div id="cfg-box">
+    <div class="cfg-hd">
+      <span class="mi material-icons-round cfg-hd-ic">tune</span>
+      <div class="cfg-hd-t">Configuration</div>
+      <button class="cfg-xbtn" onclick="closeCfg()"><span class="mi material-icons-round">close</span></button>
+    </div>
+    <div class="cfg-tabs">
+      <button class="ctab on" data-pane="p-chat" onclick="switchTab(this)">CHAT</button>
+      <button class="ctab" data-pane="p-img"  onclick="switchTab(this)">IMAGE</button>
+      <button class="ctab" data-pane="p-sys"  onclick="switchTab(this)">SYSTEM</button>
+      <button class="ctab" data-pane="p-dng"  onclick="switchTab(this)">DANGER</button>
+    </div>
+    <div class="cfg-body">
+      <!-- CHAT -->
+      <div id="p-chat" class="tab-pane on">
+        <div class="fg"><label class="flbl">Bot Name</label><input id="cf-name" type="text" class="fi" placeholder="Karen AI"/></div>
+        <div class="fg"><label class="flbl">Gemini API Key</label><div class="fi-wrap"><input id="cf-key" type="password" class="fi" placeholder="AIzaSy…"/><button class="eye-btn" onclick="toggleEye('cf-key',this)"><span class="mi material-icons-round">visibility</span></button></div></div>
+        <div class="fg"><label class="flbl">ElevenLabs API Key <span style="color:var(--gn);font-size:9px;letter-spacing:.5px">FEMALE VOICE</span></label><div class="fi-wrap"><input id="cf-el-key" type="password" class="fi" placeholder="sk_… (optional — for natural female voice)"/><button class="eye-btn" onclick="toggleEye('cf-el-key',this)"><span class="mi material-icons-round">visibility</span></button></div><div style="font-size:11px;color:var(--t3);margin-top:-10px;margin-bottom:10px">Free at elevenlabs.io · Falls back to browser voice if limit reached</div></div>
+        <div class="fg"><label class="flbl">Model</label>
+          <select id="cf-model" class="fsel">
+            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+          </select>
+        </div>
+        <div class="fg"><div class="tr"><span class="tlbl">Temperature</span><span class="tval" id="cf-temp-v">0.7</span></div><input type="range" id="cf-temp" class="rng" min="0" max="2" step="0.05" value="0.7" oninput="g('cf-temp-v').textContent=parseFloat(this.value).toFixed(2)"/></div>
+        <div class="fg"><label class="flbl">Live Voice (Gemini Native)</label>
+          <select id="cf-voice" class="fsel">
+            <option value="Aoede">Aoede (Warm, Female)</option>
+            <option value="Charon">Charon (Deep, Male)</option>
+            <option value="Fenrir">Fenrir (Expressive, Male)</option>
+            <option value="Kore">Kore (Clear, Female)</option>
+            <option value="Puck">Puck (Upbeat, Male)</option>
+            <option value="Zephyr">Zephyr (Bright, Female)</option>
+            <option value="Leda">Leda (Youthful, Female)</option>
+            <option value="Orus">Orus (Steady, Male)</option>
+          </select>
+        </div>
+        <div class="fg"><label class="flbl">Live Voice Model</label>
+          <select id="cf-live-model" class="fsel">
+            <option value="gemini-2.0-flash-live-001">Gemini 2.0 Flash Live (Stable)</option>
+            <option value="gemini-2.5-flash-exp-native-audio-thinking-dialog">Gemini 2.5 Flash Live (Experimental)</option>
+          </select>
+        </div>
+      </div>
+      <!-- IMAGE -->
+      <div id="p-img" class="tab-pane">
+        <div style="background:rgba(255,180,0,.07);border:1px solid rgba(255,180,0,.22);border-radius:11px;padding:12px 14px;margin-bottom:14px;font-size:12.5px;color:rgba(255,200,80,.8);line-height:1.55">
+          <strong>Note:</strong> Image <em>generation</em> is not yet implemented. You can still <strong>upload images</strong> using the photo button in the chat input to send images to the AI for analysis.
+        </div>
+        <div class="tog-row">
+          <div class="tog-info"><div class="tog-name">Image Generation</div><div class="tog-desc">Enable AI image creation</div></div>
+          <label class="tog"><input type="checkbox" id="cf-img-on" checked/><span class="tog-sl"></span></label>
+        </div>
+        <div class="fg"><label class="flbl">Image API Key</label><input id="cf-img-key" type="text" class="fi" placeholder="Optional — uses Chat key if empty"/></div>
+        <div class="fg"><label class="flbl">Image Model</label>
+          <select id="cf-img-model" class="fsel">
+            <option value="gemini-2.5-flash-preview-04-17">Gemini 2.5 Flash Image</option>
+            <option value="imagen-3.0-generate-001">Imagen 3</option>
+          </select>
+        </div>
+      </div>
+      <!-- SYSTEM -->
+      <div id="p-sys" class="tab-pane">
+        <div class="fg"><label class="flbl">System Instructions</label><textarea id="cf-sys" class="fta" rows="6" placeholder="You are Karen, a helpful assistant…"></textarea></div>
+        <div class="fg"><label class="flbl">Options</label>
+          <div class="chk-row" onclick="toggleChk('cf-sugg')">
+            <div class="chk-box" id="cf-sugg"><span class="mi material-icons-round">check</span></div>
+            <span class="chk-txt">Generate suggested follow-up questions after each response</span>
+          </div>
+        </div>
+      </div>
+      <!-- DANGER -->
+      <div id="p-dng" class="tab-pane">
+        <div class="src-card">
+          <div class="src-card-hd"><span class="mi material-icons-round">code</span><span class="src-card-nm">Source Code</span></div>
+          <p class="src-card-desc">Download this app as a standalone HTML file you can run anywhere.</p>
+          <button class="dl-btn" onclick="dlApp()">Download App Source</button>
+        </div>
+        <div class="dng-card">
+          <div class="dng-hd"><span class="mi material-icons-round">warning</span><span class="dng-nm">Danger Zone</span></div>
+          <button class="rst-btn" onclick="factReset()">Factory Reset — Wipe All Data</button>
+        </div>
+      </div>
+    </div>
+    <div class="cfg-ft">
+      <button class="cfg-cancel" onclick="closeCfg()">Cancel</button>
+      <button class="cfg-save"   onclick="saveCfg()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ APP ════ -->
+<div id="app">
+  <!-- Sidebar overlay -->
+  <div id="sbo" onclick="closeSB()"></div>
+
+  <!-- Sidebar -->
+  <aside id="sb">
+    <div class="sb-top">
+      <div class="sb-logo"><span class="mi material-icons-round">smart_toy</span></div>
+      <div class="sb-title">Karen<span>AI</span></div>
+      <button class="sb-close-btn" onclick="closeSB()"><span class="mi material-icons-round">close</span></button>
+    </div>
+    <div class="sb-body">
+      <button class="new-btn" onclick="newChat()"><span class="mi material-icons-round">add</span>New Chat</button>
+      <div class="sect-lbl">Recent Chats</div>
+      <div id="chat-list"></div>
+    </div>
+    <div class="sb-bot">
+      <button class="sb-btn" onclick="openCfg()"><span class="mi material-icons-round">settings</span>Configuration</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div id="main">
+    <!-- Header -->
+    <header id="hdr">
+      <button class="icon-btn" id="sb-menu-btn" onclick="toggleSB()"><span class="mi material-icons-round">menu</span></button>
+      <div class="ai-badge"><span class="mi material-icons-round">smart_toy</span></div>
+      <div class="hdr-info">
+        <div class="hdr-name" id="hdr-name">Karen AI</div>
+        <div class="hdr-status"><div class="status-dot"></div><div class="status-txt">ONLINE</div></div>
+      </div>
+      <button class="icon-btn voice-hdr-btn" id="voice-hdr-btn" onclick="openVoice()" title="Voice to Voice"><span class="mi material-icons-round">record_voice_over</span></button>
+      <button class="icon-btn" onclick="confirmClear()" title="Clear chat"><span class="mi material-icons-round">delete_outline</span></button>
+    </header>
+
+    <!-- Chat -->
+    <div id="chat">
+      <div id="empty">
+        <div class="em-orb"><span class="mi material-icons-round">smart_toy</span></div>
+        <div class="em-h">Hello, I am</div>
+        <div class="em-n" id="em-name">Karen AI</div>
+        <div class="em-s">Clear, simple, step by step answers. Send text, images, or talk to me directly.</div>
+        <div class="em-vc" onclick="openVoice()"><span class="mi material-icons-round">record_voice_over</span>Tap to talk with Karen</div>
+      </div>
+    </div>
+
+    <!-- Typing -->
+    <div id="typr-wrap">
+      <div id="typr">
+        <div class="av-k">K</div>
+        <div class="typr-bub"><div class="td"></div><div class="td"></div><div class="td"></div></div>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div id="inp-wrap">
+      <div id="prev-strip"></div>
+      <div id="chips"></div>
+      <div id="vrec-bar"><div class="vrec-dot"></div><span>Recording… tap mic to stop</span></div>
+      <div class="input-box">
+        <button class="tb" onclick="g('img-in').click()" title="Upload image"><span class="mi material-icons-round">add_photo_alternate</span></button>
+        <button class="tb" id="mic-tb" onclick="toggleTextMic()" title="Voice input"><span class="mi material-icons-round">mic</span></button>
+        <button class="tb vc-color" onclick="openVoice()" title="Voice to Voice Mode"><span class="mi material-icons-round">record_voice_over</span></button>
+        <button class="tb" onclick="openCfg()" title="Settings"><span class="mi material-icons-round">tune</span></button>
+        <textarea id="minp" rows="1" placeholder="Ask Karen…  or tap mic to talk" oninput="autoH(this)" onkeydown="onKey(event)"></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendMsg()"><span class="mi material-icons-round">arrow_forward</span></button>
+      </div>
+      <div class="disc-txt">Karen AI can make mistakes. Verify important information.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ══════════════════════════════════════════════
+   CONFIGURATION
+══════════════════════════════════════════════ */
+let C = {
+  name:'Karen AI', key:'', model:'gemini-2.5-flash',
+  temp:0.7, imgOn:true, imgKey:'', imgModel:'gemini-2.5-flash-preview-04-17',
+  sys:'', sugg:true, voiceName:'Aoede', voiceSpeed:1.0,
+  liveModel:'gemini-2.0-flash-live-001',
+  elevenLabsKey:''
+};
+
+/* ══════════════════════════════════════════════
+   APP STATE
+══════════════════════════════════════════════ */
+let chats    = {};   // id → {id, title, msgs[], created}
+let curr     = null; // current chat id
+let busy     = false;
+let pendImgs = [];   // [{data, mime, url}]
+let textRec  = null;
+let textRecOn = false;
+let sbOpen   = false;
+
+/* ══════════════════════════════════════════════
+   VOICE STATE  (single object — no desync)
+══════════════════════════════════════════════ */
+const V = {
+  on:false, listening:false, speaking:false, thinking:false,
+  muted:false, spkOff:false, restart:true, fallback:false,
+  rec:null, utt:null
+};
+
+/* ══════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════ */
+const g   = id => document.getElementById(id);
+const esc = s  => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const ts  = () => new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+const est = s  => Math.ceil((s||'').length/4);
+const uid = () => '_'+Math.random().toString(36).slice(2)+Date.now().toString(36);
+
+function toast(msg, dur=2800){
+  const c=g('toasts'), el=document.createElement('div');
+  el.className='toast'; el.textContent=msg; c.appendChild(el);
+  setTimeout(()=>{
+    el.style.opacity='0';
+    el.style.transition='opacity .28s';
+    setTimeout(()=>el.remove(),290);
+  }, dur);
+}
+
+/* ══════════════════════════════════════════════
+   STORAGE
+══════════════════════════════════════════════ */
+function loadAll(){
+  try{ C={...C,...JSON.parse(localStorage.getItem('karen_c')||'{}')}; }catch{}
+  try{ chats=JSON.parse(localStorage.getItem('karen_h')||'{}'); }catch{}
+}
+function saveC(){ try{ localStorage.setItem('karen_c',JSON.stringify(C)); }catch{} }
+function saveH(){
+  // Strip base64 image data before saving to avoid localStorage overflow
+  try{
+    const slim={};
+    Object.entries(chats).forEach(([id,ch])=>{
+      slim[id]={...ch, msgs:(ch.msgs||[]).map(m=>({
+        ...m, imgs:(m.imgs||[]).map(i=>({stripped:true, mime:i.mime||'image/jpeg'}))
+      }))};
+    });
+    localStorage.setItem('karen_h',JSON.stringify(slim));
+  }catch(e){ console.warn('Save failed',e); }
+}
+
+/* ══════════════════════════════════════════════
+   SYSTEM PROMPT  (forces plain text, no symbols)
+══════════════════════════════════════════════ */
+const BASE_PROMPT = `You are Karen, a friendly and helpful AI assistant.
+
+IMPORTANT RULES — always follow every rule:
+1. Never use ANY markdown symbols: no **, no ##, no *, no _, no ~, no backticks, no >, no dashes for bullets.
+2. Write only in plain, simple English.
+3. For numbered steps write exactly like: Step 1: then the text. Step 2: then the text.
+4. Keep sentences short. Keep paragraphs short.
+5. Be warm, clear and conversational.
+6. When you see an image, describe what you see clearly in plain text.`;
+
+const sysPrompt = () => {
+  const extra = (C.sys||'').trim();
+  return extra ? BASE_PROMPT+'\n\nAdditional instructions:\n'+extra : BASE_PROMPT;
+};
+
+/* ══════════════════════════════════════════════
+   CLEAN TEXT  (strip any remaining markdown)
+══════════════════════════════════════════════ */
+function strip(raw){
+  if(!raw) return '';
+  return raw
+    .replace(/^#{1,6}\s+/gm,'')
+    .replace(/\*\*(.+?)\*\*/gs,'$1').replace(/__(.+?)__/gs,'$1')
+    .replace(/\*(.+?)\*/gs,'$1').replace(/_(.+?)_/gs,'$1')
+    .replace(/~~(.+?)~~/gs,'$1')
+    .replace(/`{3}[\s\S]*?`{3}/g,m=>m.replace(/`{3}\w*\n?/g,'').replace(/`{3}/g,'').trim())
+    .replace(/`(.+?)`/g,'$1')
+    .replace(/^[-*_]{3,}\s*$/gm,'').replace(/^>\s*/gm,'')
+    .replace(/^[\s]*[-*+]\s+/gm,'')
+    .replace(/\[(.+?)\]\(.+?\)/g,'$1').replace(/!\[.*?\]\(.+?\)/g,'')
+    .replace(/\n{3,}/g,'\n\n').trim();
+}
+
+/* ══════════════════════════════════════════════
+   RENDER PLAIN TEXT → HTML
+══════════════════════════════════════════════ */
+function renderText(raw){
+  if(!raw) return '';
+  const text = strip(raw);
+  const lines = text.split('\n');
+  let html='', i=0;
+
+  while(i<lines.length){
+    const line = lines[i].trim();
+    if(!line){ i++; continue; }
+
+    // Numbered steps: "Step 1: …" or "1. …" or "1) …"
+    if(/^(step\s*\d+\s*[:.)\s]|\d+[.)]\s)/i.test(line)){
+      const steps=[]; let j=i;
+      while(j<lines.length){
+        const l=lines[j].trim(); if(!l){j++;break;}
+        const m=l.match(/^(?:step\s*(\d+)\s*[:.)\s]+|(\d+)[.)]\s+)(.*)/i);
+        if(m){ steps.push({n:m[1]||m[2],t:(m[3]||'').trim()}); j++; }
+        else break;
+      }
+      if(steps.length){
+        html+='<ol class="rs">';
+        steps.forEach(s=>html+=`<li class="rs-i"><div class="rs-n">${esc(s.n)}</div><div class="rs-t">${esc(s.t)}</div></li>`);
+        html+='</ol>'; i=j; continue;
+      }
+    }
+
+    // Short heading (ends with colon, no period, short)
+    if(line.length<68 && line.endsWith(':') && !line.includes('.') && line.split(' ').length<10){
+      html+=`<div class="rh">${esc(line)}</div>`; i++; continue;
+    }
+
+    // Paragraph — collect consecutive non-empty lines that aren't steps/headings
+    const para=[];
+    while(i<lines.length){
+      const l=lines[i].trim(); if(!l) break;
+      if(/^(step\s*\d+\s*[:.)\s]|\d+[.)]\s)/i.test(l)) break;
+      if(l.length<68&&l.endsWith(':')&&!l.includes('.')&&l.split(' ').length<10) break;
+      para.push(l); i++;
+    }
+    if(para.length) html+=`<p class="rp">${esc(para.join(' '))}</p>`;
+    // NOTE: No i++ here — the outer loop's blank-line handler (if(!line){i++;continue;})
+    // already consumes blank separators. Adding i++ here would skip the next Step/Heading.
+  }
+  return html || `<p class="rp">${esc(text)}</p>`;
+}
+
+/* ══════════════════════════════════════════════
+   IMAGE PROCESSING
+══════════════════════════════════════════════ */
+function normMime(m){ const l=(m||'').toLowerCase(); if(l.includes('png'))return'image/png'; if(l.includes('gif'))return'image/gif'; if(l.includes('webp'))return'image/webp'; return'image/jpeg'; }
+
+function compressImg(file){
+  return new Promise((ok,fail)=>{
+    const rd=new FileReader();
+    rd.onerror=()=>fail(new Error('Cannot read file'));
+    rd.onload=ev=>{
+      const img=new Image();
+      img.onerror=()=>fail(new Error('Cannot decode image'));
+      img.onload=()=>{
+        const MAX=1024; let {width:w,height:h}=img;
+        if(w>MAX||h>MAX){ if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;} }
+        const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+        cv.getContext('2d').drawImage(img,0,0,w,h);
+        const url=cv.toDataURL('image/jpeg',0.82);
+        ok({data:url.split(',')[1], mime:'image/jpeg', url});
+      };
+      img.src=ev.target.result;
+    };
+    rd.readAsDataURL(file);
+  });
+}
+
+/* ══════════════════════════════════════════════
+   CONFIG MODAL
+══════════════════════════════════════════════ */
+function openCfg(){ fillCfgUI(); g('cfg-ov').classList.add('show'); closeSB(); }
+function closeCfg(){ g('cfg-ov').classList.remove('show'); }
+
+function fillCfgUI(){
+  g('cf-name').value  = C.name||'Karen AI';
+  g('cf-key').value   = C.key||'';
+  g('cf-model').value = C.model||'gemini-2.5-flash';
+  g('cf-temp').value  = C.temp??0.7;
+  g('cf-temp-v').textContent = parseFloat(C.temp??0.7).toFixed(2);
+  g('cf-img-on').checked    = C.imgOn!==false;
+  g('cf-img-key').value     = C.imgKey||'';
+  g('cf-img-model').value   = C.imgModel||'gemini-2.5-flash-preview-04-17';
+  g('cf-sys').value         = C.sys||'';
+  g('cf-voice').value       = C.voiceName||'Aoede';
+  if(g('cf-live-model')) g('cf-live-model').value = C.liveModel||'gemini-2.0-flash-live-001';
+  if(g('cf-el-key')) g('cf-el-key').value = C.elevenLabsKey||'';
+  setChk('cf-sugg', C.sugg!==false);
+}
+
+function saveCfg(){
+  C.name       = g('cf-name').value.trim()||'Karen AI';
+  C.key        = g('cf-key').value.trim();
+  C.model      = g('cf-model').value;
+  C.temp       = parseFloat(g('cf-temp').value)||0.7;
+  C.imgOn      = g('cf-img-on').checked;
+  C.imgKey     = g('cf-img-key').value.trim();
+  C.imgModel   = g('cf-img-model').value;
+  C.sys        = g('cf-sys').value.trim();
+  C.sugg       = !g('cf-sugg').classList.contains('off');
+  C.voiceName  = g('cf-voice').value||'Aoede';
+  if(g('cf-live-model')) C.liveModel = g('cf-live-model').value;
+  if(g('cf-el-key')) C.elevenLabsKey = g('cf-el-key').value.trim();
+  saveC();
+  g('hdr-name').textContent = C.name;
+  const emn=g('em-name'); if(emn) emn.textContent=C.name;
+  closeCfg(); toast('Configuration saved');
+}
+
+function switchTab(btn){
+  document.querySelectorAll('.ctab').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on');
+  g(btn.dataset.pane).classList.add('on');
+}
+function toggleEye(id,btn){
+  const inp=g(id); inp.type=inp.type==='password'?'text':'password';
+  btn.querySelector('.mi').textContent=inp.type==='password'?'visibility':'visibility_off';
+}
+function toggleChk(id){
+  const b=g(id); b.classList.toggle('off');
+  b.innerHTML=b.classList.contains('off')?'':'<span class="mi material-icons-round">check</span>';
+}
+function setChk(id,on){
+  const b=g(id); if(!b)return;
+  b.classList[on?'remove':'add']('off');
+  b.innerHTML=on?'<span class="mi material-icons-round">check</span>':'';
+}
+function loadVoices(){
+  // Voices are now static Gemini native voices — no dynamic loading needed
+}
+
+function dlApp(){
+  const html='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
+  const a=document.createElement('a');
+  const url=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));
+  a.href=url; a.download='KarenAI.html';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+  toast('Downloading…');
+}
+function factReset(){
+  if(!confirm('Permanently wipe ALL chats and settings?'))return;
+  localStorage.removeItem('karen_c'); localStorage.removeItem('karen_h'); location.reload();
+}
+
+/* ══════════════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════════════ */
+function toggleSB(){ sbOpen?closeSB():openSB(); }
+function openSB(){ sbOpen=true; g('sb').classList.add('open'); g('sbo').classList.add('show'); }
+function closeSB(){ sbOpen=false; g('sb').classList.remove('open'); g('sbo').classList.remove('show'); }
+
+/* ══════════════════════════════════════════════
+   CHAT MANAGEMENT
+══════════════════════════════════════════════ */
+function makeChat(){
+  const id='c'+Date.now();
+  chats[id]={id,title:'New Chat',msgs:[],created:Date.now()};
+  curr=id; saveH(); renderList();
+}
+function ensureChat(){ if(!curr||!chats[curr]) makeChat(); }
+function newChat(){ makeChat(); clearChat(); closeSB(); }
+
+function loadChat(id){
+  const ch=chats[id]; if(!ch)return;
+  curr=id;
+  if(!ch.msgs||!ch.msgs.length){ clearChat(); renderList(); closeSB(); return; }
+  const area=g('chat'); area.innerHTML='';
+  ch.msgs.forEach(m=>renderMsg(m));
+  renderList(); scrollBot(); closeSB();
+}
+function delChat(id,e){
+  e.stopPropagation(); delete chats[id];
+  if(curr===id){ curr=null; clearChat(); }
+  saveH(); renderList();
+}
+function renderList(){
+  const l=g('chat-list'); l.innerHTML='';
+  const sorted=Object.values(chats).sort((a,b)=>b.created-a.created);
+  if(!sorted.length){ l.innerHTML='<div style="color:var(--t3);font-size:12px;padding:5px 4px;text-align:center">No chats yet</div>'; return; }
+  sorted.forEach(ch=>{
+    const d=document.createElement('div');
+    d.className='chat-item'+(ch.id===curr?' active':'');
+    d.innerHTML=`<div class="ci-ic"><span class="mi material-icons-round">chat_bubble_outline</span></div><div class="ci-t">${esc(ch.title)}</div><div class="ci-del" onclick="delChat('${ch.id}',event)"><span class="mi material-icons-round">delete_outline</span></div>`;
+    d.onclick=e=>{ if(!e.target.closest('.ci-del'))loadChat(ch.id); };
+    l.appendChild(d);
+  });
+}
+function clearChat(){
+  const area=g('chat'); area.innerHTML='';
+  const em=document.createElement('div'); em.id='empty';
+  em.innerHTML=`<div class="em-orb"><span class="mi material-icons-round">smart_toy</span></div><div class="em-h">Hello, I am</div><div class="em-n" id="em-name">${esc(C.name||'Karen AI')}</div><div class="em-s">Clear, simple, step by step answers. Send text, images, or talk to me directly.</div><div class="em-vc" onclick="openVoice()"><span class="mi material-icons-round">record_voice_over</span>Tap to talk with Karen</div>`;
+  area.appendChild(em);
+  g('chips').innerHTML='';
+}
+function confirmClear(){
+  if(!curr||!chats[curr]||!chats[curr].msgs.length){ toast('Nothing to clear'); return; }
+  if(confirm('Clear this conversation?')){ chats[curr].msgs=[]; saveH(); clearChat(); toast('Cleared'); }
+}
+
+/* ══════════════════════════════════════════════
+   RENDER MESSAGES
+══════════════════════════════════════════════ */
+function renderMsg(m){
+  const area=g('chat');
+  const grp=document.createElement('div'); grp.className='msg-grp'; grp.id='g'+m.id;
+
+  if(m.role==='user'){
+    const row=document.createElement('div'); row.className='msg-row user';
+    row.innerHTML=`<div class="av-u">U</div><div class="bubble user" id="b${m.id}">${imgHTML(m.imgs)}${m.text?`<span>${esc(m.text)}</span>`:''}</div>`;
+    grp.appendChild(row);
+    const acts=document.createElement('div'); acts.className='msg-acts ua';
+    acts.innerHTML=`<button class="act" onclick="editMsg('${m.id}')" title="Edit"><span class="mi material-icons-round">edit</span></button><button class="act" onclick="copyMsg('${m.id}')" title="Copy"><span class="mi material-icons-round">content_copy</span></button><button class="act" onclick="speakMsg('${m.id}')" title="Speak"><span class="mi material-icons-round">volume_up</span></button>`;
+    grp.appendChild(acts);
+  } else {
+    const row=document.createElement('div'); row.className='msg-row ai';
+    row.innerHTML=`<div class="av-k">K</div><div class="bubble ai" id="b${m.id}"><div id="mc${m.id}">${renderText(m.text)}</div><div class="tok-row"><span style="font-size:11px">&#9671;</span>&nbsp;${m.toks||est(m.text)} tokens</div></div>`;
+    grp.appendChild(row);
+    const acts=document.createElement('div'); acts.className='msg-acts ka';
+    acts.innerHTML=`<button class="act" onclick="speakMsg('${m.id}')" title="Speak"><span class="mi material-icons-round">volume_up</span></button><button class="act" onclick="copyMsg('${m.id}')" title="Copy"><span class="mi material-icons-round">content_copy</span></button><button class="act" onclick="regenMsg('${m.id}')" title="Regenerate"><span class="mi material-icons-round">refresh</span></button><button class="act" onclick="dlMsg('${m.id}')" title="Download"><span class="mi material-icons-round">download</span></button>`;
+    grp.appendChild(acts);
+  }
+  area.appendChild(grp); return grp;
+}
+
+function imgHTML(imgs){
+  if(!imgs||!imgs.length) return '';
+  return imgs.map(i=>i.stripped
+    ?`<div class="img-stamp"><span class="mi material-icons-round">image</span>Image attached</div>`
+    :`<img src="${i.url||`data:${i.mime};base64,${i.data}`}" alt="image"/>`
+  ).join('');
+}
+
+/* ══════════════════════════════════════════════
+   STREAMING UI
+══════════════════════════════════════════════ */
+function makeStream(id){
+  const area=g('chat');
+  const grp=document.createElement('div'); grp.className='msg-grp'; grp.id='g'+id;
+  const row=document.createElement('div'); row.className='msg-row ai';
+  row.innerHTML=`<div class="av-k">K</div><div class="bubble ai" id="b${id}"><div id="mc${id}"><div class="typr-bub" style="display:inline-flex;padding:6px 10px;border:none;background:transparent;gap:5px"><div class="td"></div><div class="td"></div><div class="td"></div></div></div></div>`;
+  grp.appendChild(row); area.appendChild(grp); scrollBot(); return {id,grp};
+}
+function patchStream(els,text){
+  const mc=g('mc'+els.id); if(!mc)return;
+  mc.innerHTML=renderText(text)+'<span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--c);animation:tp 1s infinite;margin-left:3px;vertical-align:middle"></span>';
+  scrollBot();
+}
+function finalStream(els,text){
+  const bub=g('b'+els.id); if(!bub)return;
+  bub.innerHTML=`<div id="mc${els.id}">${renderText(text)}</div><div class="tok-row"><span style="font-size:11px">&#9671;</span>&nbsp;${est(text)} tokens</div>`;
+  const acts=document.createElement('div'); acts.className='msg-acts ka';
+  acts.innerHTML=`<button class="act" onclick="speakMsg('${els.id}')" title="Speak"><span class="mi material-icons-round">volume_up</span></button><button class="act" onclick="copyMsg('${els.id}')" title="Copy"><span class="mi material-icons-round">content_copy</span></button><button class="act" onclick="regenMsg('${els.id}')" title="Regenerate"><span class="mi material-icons-round">refresh</span></button><button class="act" onclick="dlMsg('${els.id}')" title="Download"><span class="mi material-icons-round">download</span></button>`;
+  els.grp.appendChild(acts);
+}
+
+/* ══════════════════════════════════════════════
+   GEMINI API
+══════════════════════════════════════════════ */
+async function callGemini(userText, imgs, opts={}){
+  if(!C.key) throw new Error('No API key. Open Configuration → CHAT tab to add your Gemini API key.');
+  const model=C.model||'gemini-2.5-flash';
+
+  // Current user message parts
+  const parts=[];
+  (imgs||[]).forEach(i=>parts.push({inlineData:{mimeType:i.mime,data:i.data}}));
+  if(userText) parts.push({text:userText});
+  else if(imgs&&imgs.length) parts.push({text:'Please look at this image carefully and describe what you see in detail.'});
+
+  // History (all messages except the last one we just added)
+  const history=(chats[curr]?.msgs||[]).slice(0,-1).map(m=>{
+    const role=m.role==='ai'?'model':'user';
+    const hasImgs=m.imgs&&m.imgs.some(i=>i.stripped||i.data);
+    if(hasImgs && !m.text) return {role, parts:[{text:'[User sent an image]'}]};
+    if(m.text) return {role, parts:[{text:m.text}]};
+    return null;
+  }).filter(Boolean);
+
+  // Voice mode uses a shorter system prompt addition for brevity
+  const sysTxt = opts.voice
+    ? sysPrompt()+'\n\nVOICE MODE: Reply in 1-2 short natural sentences, like a real person talking. Use contractions (I\'m, don\'t, you\'re). Sound warm and genuine, not robotic. No lists, no bullet points.'
+    : sysPrompt();
+
+  const body={
+    contents:[...history, {role:'user', parts}],
+    generationConfig:{temperature:C.temp??0.7, maxOutputTokens: opts.maxOutputTokens||4096},
+    systemInstruction:{parts:[{text:sysTxt}]}
+  };
+
+  const url=`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${C.key}`;
+  const resp=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!resp.ok){
+    const err=await resp.json().catch(()=>({}));
+    throw new Error(err.error?.message||`HTTP ${resp.status}`);
+  }
+  return resp;
+}
+
+async function readSSE(resp, streamEls, onChunk){
+  const rdr=resp.body.getReader(), dec=new TextDecoder();
+  let buf='', full='', ssesDone=false;
+  while(true){
+    const{done,value}=await rdr.read(); if(done)break;
+    buf+=dec.decode(value,{stream:true});
+    const lines=buf.split('\n'); buf=lines.pop();
+    for(const ln of lines){
+      if(!ln.startsWith('data: '))continue;
+      const raw=ln.slice(6).trim(); if(raw==='[DONE]'){ssesDone=true;break;}
+      try{
+        const ck=JSON.parse(raw);
+        (ck.candidates?.[0]?.content?.parts||[]).forEach(p=>{ if(p.text)full+=p.text; });
+        if(full && streamEls) patchStream(streamEls, full);
+        if(full && onChunk) onChunk(full);
+      }catch{}
+    }
+    if(ssesDone) break;
+    scrollBot();
+  }
+  return full||'I did not receive a response. Please check your API key and try again.';
+}
+
+/* ══════════════════════════════════════════════
+   SEND MESSAGE  (text + images)
+══════════════════════════════════════════════ */
+async function sendMsg(override){
+  const inp=g('minp');
+  const text=(override!==undefined?override:inp.value).trim();
+  const hasImgs=pendImgs.length>0;
+  if((!text&&!hasImgs)||busy)return;
+
+  ensureChat();
+  g('empty')?.remove();
+  g('chips').innerHTML='';
+
+  const imgs=[...pendImgs]; pendImgs=[]; renderPrev();
+  if(override===undefined){ inp.value=''; autoH(inp); }
+
+  // Auto-title on first message
+  if(!chats[curr].msgs.length){
+    chats[curr].title=(text||(hasImgs?'Image analysis':'Chat')).slice(0,44);
+    renderList();
+  }
+
+  // User message
+  const mid=uid(), t=ts();
+  const uMsg={id:mid, role:'user', text, imgs:imgs.map(i=>({stripped:false,...i})), t};
+  chats[curr].msgs.push(uMsg);
+  renderMsg(uMsg); scrollBot(); saveH();
+
+  busy=true; showTyp(true); setLoad(true);
+
+  const aiId=uid(), aiT=ts();
+  const sEls=makeStream(aiId);
+  let full='';
+
+  try{
+    const resp=await callGemini(text, imgs);
+    showTyp(false);
+    full=await readSSE(resp, sEls);
+    finalStream(sEls, full);
+    const aiMsg={id:aiId, role:'ai', text:full, imgs:[], t:aiT, toks:est(full)};
+    chats[curr].msgs.push(aiMsg);
+    saveH();
+    if(C.sugg!==false) genSugg(full);
+  }catch(err){
+    showTyp(false);
+    full='Sorry, I had a problem: '+err.message;
+    finalStream(sEls, full);
+    chats[curr].msgs.push({id:aiId, role:'ai', text:full, imgs:[], t:aiT, toks:0});
+    saveH();
+  }finally{
+    busy=false; showTyp(false); setLoad(false); scrollBot();
+  }
+}
+
+/* ══════════════════════════════════════════════
+   SUGGESTION CHIPS
+══════════════════════════════════════════════ */
+function showChips(list){
+  const el=g('chips'); el.innerHTML='';
+  if(!list||!list.length)return;
+  list.slice(0,3).forEach(c=>{
+    const btn=document.createElement('button'); btn.className='chip'; btn.textContent=c;
+    btn.onclick=()=>{ el.innerHTML=''; sendMsg(c); };
+    el.appendChild(btn);
+  });
+}
+async function genSugg(reply){
+  if(!C.key||!C.sugg)return;
+  try{
+    const body={
+      contents:[{role:'user',parts:[{text:`Based on this AI response, generate exactly 3 short follow-up questions. Return ONLY a JSON array of 3 plain strings with no markdown:\n\n${reply.slice(0,380)}`}]}],
+      generationConfig:{temperature:0.5, maxOutputTokens:140}
+    };
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${C.model||'gemini-2.5-flash'}:generateContent?key=${C.key}`,
+      {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json();
+    const raw=d?.candidates?.[0]?.content?.parts?.[0]?.text||'[]';
+    const cleaned=raw.replace(/```json|```/g,'').trim();
+    const match=cleaned.match(/\[[\s\S]*\]/);
+    const chips=JSON.parse(match?match[0]:'[]');
+    if(Array.isArray(chips)) showChips(chips.filter(c=>typeof c==='string'&&c.trim()));
+  }catch{}
+}
+
+/* ══════════════════════════════════════════════
+   MESSAGE ACTIONS
+══════════════════════════════════════════════ */
+function getMsg(id){ return chats[curr]?.msgs?.find(m=>m.id===id); }
+function copyMsg(id){
+  const m=getMsg(id); if(!m) return;
+  const text=m.text||'';
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(text).then(()=>toast('Copied')).catch(()=>copyFallback(text));
+  } else { copyFallback(text); }
+}
+function copyFallback(text){
+  const ta=document.createElement('textarea');
+  ta.value=text; ta.style.cssText='position:fixed;opacity:0;top:0;left:0;pointer-events:none';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); toast('Copied'); }catch{ toast('Copy failed'); }
+  document.body.removeChild(ta);
+}
+function speakMsg(id){
+  const m=getMsg(id); if(!m)return;
+  try{ elAudio?.pause(); elAudio=null; }catch{}
+  if(!window.speechSynthesis&&!C.elevenLabsKey){ toast('Text-to-speech not supported'); return; }
+  window.speechSynthesis?.cancel();
+  toast('Speaking…');
+  elevenLabsSpeak(strip(m.text||''), null);
+}
+function applyVoice(u){
+  if(!window.speechSynthesis) return;
+  const set=(voices)=>{
+    if(!voices.length) return;
+    const en=voices.filter(v=>v.lang.startsWith('en'));
+    // Priority: Google Neural > Microsoft Neural > any Natural/Neural name > Google en > en-US default > first en
+    const pick=
+      en.find(v=>/google/i.test(v.name)&&/neural|natural|wavenet/i.test(v.name))||
+      en.find(v=>/microsoft/i.test(v.name)&&/neural|natural/i.test(v.name))||
+      en.find(v=>/neural|natural|enhanced/i.test(v.name))||
+      en.find(v=>/google/i.test(v.name)&&v.lang==='en-US')||
+      en.find(v=>/google/i.test(v.name))||
+      en.find(v=>v.lang==='en-US'&&v.localService)||
+      en.find(v=>v.lang==='en-US')||
+      en[0]||voices[0];
+    u.voice=pick;
+  };
+  const voices=window.speechSynthesis.getVoices();
+  if(voices.length){ set(voices); return; }
+  window.speechSynthesis.addEventListener('voiceschanged',()=>set(window.speechSynthesis.getVoices()),{once:true});
+}
+function editMsg(id){
+  const bub=g('b'+id), m=getMsg(id); if(!bub||!m)return;
+  const ta=document.createElement('textarea'); ta.value=m.text||'';
+  ta.style.cssText='width:100%;background:transparent;border:none;outline:none;color:#f0f4ff;font-family:Inter,sans-serif;font-size:14px;resize:none;min-height:50px;line-height:1.5';
+  const sv=document.createElement('button'); sv.textContent='Save';
+  sv.style.cssText='margin-top:6px;padding:5px 13px;border-radius:8px;border:1px solid rgba(0,212,255,.4);background:rgba(0,212,255,.09);color:#00d4ff;cursor:pointer;font-size:12.5px;font-family:Inter,sans-serif';
+  sv.onclick=()=>{
+    m.text=ta.value; saveH();
+    // Restore bubble correctly — user bubbles have no token row
+    if(m.role==='user'){
+      bub.innerHTML=`<span>${esc(ta.value)}</span>`;
+    } else {
+      bub.innerHTML=`<div id="mc${m.id}">${renderText(ta.value)}</div><div class="tok-row"><span style="font-size:11px">&#9671;</span>&nbsp;${est(ta.value)} tokens</div>`;
+    }
+  };
+  bub.innerHTML=''; bub.appendChild(ta); bub.appendChild(sv); ta.focus();
+}
+function regenMsg(id){
+  if(!curr||!chats[curr]) return;
+  const msgs=chats[curr].msgs;
+  const idx=msgs.findIndex(m=>m.id===id); if(idx<0) return;
+  let uIdx=idx-1;
+  while(uIdx>=0 && msgs[uIdx].role!=='user') uIdx--;
+  if(uIdx<0) return;
+  const um=msgs[uIdx];
+  const toRemove=msgs.splice(uIdx, msgs.length-uIdx);
+  toRemove.forEach(m=>g('g'+m.id)?.remove());
+  saveH();
+  pendImgs=(um.imgs||[]).filter(i=>!i.stripped);
+  if(pendImgs.length) renderPrev();
+  sendMsg(um.text||'');
+}
+function dlMsg(id){
+  const m=getMsg(id); if(!m)return;
+  const a=document.createElement('a');
+  const url=URL.createObjectURL(new Blob([strip(m.text||'')],{type:'text/plain'}));
+  a.href=url; a.download='karen-response.txt'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  toast('Downloaded');
+}
+
+/* ══════════════════════════════════════════════
+   IMAGE UPLOAD
+══════════════════════════════════════════════ */
+async function onImgFiles(e){
+  const files=Array.from(e.target.files); e.target.value='';
+  for(const f of files){
+    try{ toast('Processing image…'); const c=await compressImg(f); pendImgs.push(c); }
+    catch(err){ toast('Image error: '+err.message); }
+  }
+  renderPrev();
+}
+function renderPrev(){
+  const s=g('prev-strip'); s.innerHTML='';
+  pendImgs.forEach((img,i)=>{
+    const w=document.createElement('div'); w.className='prev-item';
+    w.innerHTML=`<img src="${img.url}" alt="preview"/>`;
+    const rm=document.createElement('button'); rm.className='prev-rm'; rm.textContent='×';
+    rm.onclick=()=>{ pendImgs.splice(i,1); renderPrev(); };
+    w.appendChild(rm); s.appendChild(w);
+  });
+}
+
+/* ══════════════════════════════════════════════
+   TEXT MIC
+══════════════════════════════════════════════ */
+function toggleTextMic(){ textRecOn?stopTextMic():startTextMic(); }
+function startTextMic(){
+  if(textRecOn) return;
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){ toast('Speech recognition needs Chrome or Edge'); return; }
+  textRec=new SR(); textRec.continuous=false; textRec.interimResults=true; textRec.lang='en-US';
+  textRec.onresult=e=>{ g('minp').value=Array.from(e.results).map(r=>r[0].transcript).join(''); autoH(g('minp')); };
+  textRec.onend=()=>stopTextMic();
+  textRec.onerror=(ev)=>{ if(ev.error==='not-allowed') toast('Mic permission denied'); stopTextMic(); };
+  try{ textRec.start(); textRecOn=true; g('mic-tb').classList.add('on'); g('vrec-bar').classList.add('show'); }
+  catch(e){ toast('Mic start failed: '+e.message); textRecOn=false; }
+}
+function stopTextMic(){
+  try{ textRec?.stop(); }catch{} textRec=null;
+  textRecOn=false; g('mic-tb')?.classList.remove('on'); g('vrec-bar')?.classList.remove('show');
+}
+
+/* ══════════════════════════════════════════════
+   VOICE-TO-VOICE — GEMINI 2.5 NATIVE LIVE
+══════════════════════════════════════════════ */
+let liveWs       = null;   // WebSocket to Gemini Live
+let liveMicCtx   = null;   // AudioContext for mic capture (16 kHz)
+let liveMicStream= null;   // MediaStream from getUserMedia
+let liveMicNode  = null;   // AudioWorkletNode (PCM encoder)
+let liveOutCtx   = null;   // AudioContext for playback (24 kHz)
+let liveNextTime = 0;      // scheduled playback cursor
+let liveWorkletObjectURL = null; // PCM worklet blob URL
+
+function setVState(state){
+  const ov=g('vov');
+  ov.classList.remove('vlistening','vspeaking','vthinking');
+  const icon=g('vorb-icon'), status=g('vov-status'), tx=g('vov-tx');
+  switch(state){
+    case 'listening':
+      ov.classList.add('vlistening'); icon.textContent='mic';
+      status.textContent='Listening…'; tx.textContent='Say something to Karen…'; tx.className='utx'; break;
+    case 'thinking':
+      ov.classList.add('vthinking'); icon.textContent='sync';
+      status.textContent='Karen is thinking…'; tx.className=''; break;
+    case 'speaking':
+      ov.classList.add('vspeaking'); icon.textContent='volume_up';
+      status.textContent='Karen is speaking…'; tx.className='ktx'; break;
+    default:
+      icon.textContent='mic';
+      status.textContent='Tap the orb to start talking';
+      tx.textContent='Say something to Karen…'; tx.className='';
+  }
+}
+
+function openVoice(){
+  if(!C.key){ toast('No API key – open Configuration → CHAT'); return; }
+  if(V.on) return;
+  V.on=true; V.restart=true; V.muted=false; V.spkOff=false;
+  V.listening=false; V.speaking=false; V.thinking=false;
+  V._reconnects=0; // FIX 9: reset retry counter on fresh session
+  g('vmute-ci').classList.remove('muted'); g('vmute-ic').textContent='mic';
+  g('vspk-ci').classList.remove('muted-spk'); g('vspk-ic').textContent='volume_up';
+  g('voice-hdr-btn').classList.add('vactive');
+  g('vov').classList.add('show');
+  setVState('thinking');
+  g('vov-status').textContent='Connecting to Gemini Live…';
+  liveConnect();
+}
+
+async function liveConnect(){
+  try{
+    // Playback AudioContext — create eagerly here (inside user-gesture chain) so
+    // mobile browsers allow audio playback without a separate gesture later
+    if(!liveOutCtx || liveOutCtx.state==='closed'){
+      liveOutCtx = new (window.AudioContext||window.webkitAudioContext)({sampleRate:24000});
+    }
+    if(liveOutCtx.state==='suspended') await liveOutCtx.resume();
+    liveNextTime = 0;
+
+    // Use saved model or stable default. v1alpha endpoint required for Live API.
+    const model = C.liveModel||'gemini-2.0-flash-live-001';
+    const wsUrl  = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${C.key}`;
+    liveWs = new WebSocket(wsUrl);
+
+    liveWs.onopen = ()=>{
+      const voiceName = C.voiceName||'Aoede';
+      const setup = {
+        setup:{
+          model:`models/${model}`,
+          generationConfig:{
+            responseModalities:['AUDIO'],
+            speechConfig:{
+              voiceConfig:{ prebuiltVoiceConfig:{ voiceName:voiceName } }
+            },
+            enableAffectiveDialog: true
+          },
+          systemInstruction:{
+            parts:[{ text: sysPrompt()+`\n\nVOICE MODE RULES — very important:
+- You are speaking out loud, so sound warm, natural and human — like a real friend talking.
+- Use natural contractions: I'm, you're, don't, can't, it's, that's, won't, let's.
+- Add light filler words where natural: "so", "well", "you know", "actually", "basically".
+- Keep answers short — 1 to 3 sentences max. Never give long lists when speaking.
+- Vary your sentence length. Mix short punchy sentences with slightly longer ones.
+- Show emotion when appropriate: enthusiasm, empathy, curiosity.
+- Never say "Certainly!", "Absolutely!", or "Of course!" — sound genuine, not robotic.
+- Speak as if you are having a real conversation, not reading a script.` }]
+          }
+        }
+      };
+      liveWs.send(JSON.stringify(setup));
+    };
+
+    liveWs.onmessage = async (ev)=>{
+      let msg;
+      try{ msg = JSON.parse(typeof ev.data==='string'?ev.data:new TextDecoder().decode(ev.data)); }catch{ return; }
+
+      // Setup complete → start mic; reset retry counter since connection succeeded
+      // FIX 7: was setVState('idle') — 'idle' not a valid state, use 'listening'
+      if(msg.setupComplete){
+        V._reconnects=0;
+        g('vov-tx').textContent='Say something to Karen…';
+        await liveStartMic();
+        return;
+      }
+
+      // Audio / text from model
+      const parts = msg.serverContent?.modelTurn?.parts||[];
+      for(const p of parts){
+        if(p.inlineData?.data && p.inlineData.mimeType?.includes('audio')){
+          V.speaking=true; V.thinking=false; setVState('speaking');
+          if(!V.spkOff) livePlayPCM(p.inlineData.data);
+        }
+        if(p.text){
+          const disp=p.text.slice(0,130);
+          g('vov-tx').textContent=disp+(p.text.length>130?'…':'');
+          g('vov-tx').className='ktx';
+        }
+      }
+
+      // Server interrupted (barge-in acknowledged)
+      if(msg.serverContent?.interrupted){
+        liveNextTime = liveOutCtx ? liveOutCtx.currentTime : 0;
+        V.speaking=false;
+        if(V.on&&!V.muted) setVState('listening');
+        return;
+      }
+
+      // FIX 3: don't reset liveNextTime=0 here — audio chunks may still be queued.
+      // Instead just update state flags; liveNextTime self-corrects in livePlayPCM.
+      if(msg.serverContent?.turnComplete){
+        V.speaking=false; V.thinking=false;
+        if(V.on&&!V.muted){
+          // Wait for queued audio to finish before switching back to listening
+          const waitDrain = ()=>{
+            if(!V.on) return;
+            const remaining = liveOutCtx ? (liveNextTime - liveOutCtx.currentTime) : 0;
+            if(remaining > 0.08){
+              setTimeout(waitDrain, Math.min(remaining*1000, 300));
+            } else {
+              liveNextTime = liveOutCtx ? liveOutCtx.currentTime : 0;
+              setVState('listening');
+            }
+          };
+          setTimeout(waitDrain, 80);
+        }
+      }
+    };
+
+    liveWs.onerror  = (err)=>{ console.warn('Live WS error', err); };
+
+    liveWs.onclose  = (ev)=>{
+      // Codes that mean server permanently rejected us — no point retrying
+      // 1002=protocol error, 1003=unsupported data, 1007=invalid payload,
+      // 1008=policy violation (bad API key/model), 1011=server error
+      const permanent = [1002, 1003, 1007, 1008, 1011];
+      if(permanent.includes(ev.code)){
+        if(ev.code===1008){
+          // Live API key not authorized — fall back to standard voice mode
+          toast('Gemini Live not available for this key. Switching to standard voice…', 3500);
+          liveStopMic();
+          try{ liveOutCtx?.close(); liveOutCtx=null; }catch{}
+          liveNextTime=0;
+          setTimeout(()=>{ if(V.on) startFallbackVoice(); }, 800);
+          return;
+        }
+        const hint = `Server rejected connection (code ${ev.code}). Check model & API key.`;
+        toast(hint, 5000); closeVoice(); return;
+      }
+      if(V.on && V.restart){
+        V._reconnects = (V._reconnects||0) + 1;
+        if(V._reconnects > 4){
+          toast('Voice connection failed after retries. Check API key & network.');
+          closeVoice(); return;
+        }
+        const delay = Math.min(1200 * V._reconnects, 5000);
+        toast('Reconnecting voice… (attempt '+V._reconnects+')');
+        liveStopMic();
+        try{ liveOutCtx?.close(); liveOutCtx=null; }catch{}
+        liveNextTime=0;
+        setTimeout(()=>{ if(V.on) liveConnect(); }, delay);
+      } else if(V.on){
+        toast('Voice session ended ('+ev.code+')'); closeVoice();
+      }
+    };
+
+  }catch(e){
+    toast('Voice setup failed: '+e.message); closeVoice();
+  }
+}
+
+function liveGetWorkletURL(){
+  if(liveWorkletObjectURL) return liveWorkletObjectURL;
+  const src=`
+    class PcmCaptureProcessor extends AudioWorkletProcessor {
+      constructor(){ super(); }
+      process(inputs){
+        const ch=(inputs[0]||[])[0]; if(!ch||!ch.length) return true;
+        const i16=new Int16Array(ch.length);
+        for(let i=0;i<ch.length;i++) i16[i]=Math.max(-32768,Math.min(32767,ch[i]*32768));
+        this.port.postMessage(i16.buffer,[i16.buffer]);
+        return true;
+      }
+    }
+    registerProcessor('pcm-capture',PcmCaptureProcessor);
+  `;
+  liveWorkletObjectURL = URL.createObjectURL(new Blob([src],{type:'application/javascript'}));
+  return liveWorkletObjectURL;
+}
+
+async function liveStartMic(){
+  if(!V.on||V.muted) return;
+  try{
+    // Fix C: resume output context in case browser started it suspended (common on iOS/mobile)
+    if(liveOutCtx?.state==='suspended') await liveOutCtx.resume();
+
+    liveMicStream = await navigator.mediaDevices.getUserMedia({audio:{sampleRate:16000,channelCount:1,echoCancellation:true,noiseSuppression:true}});
+    liveMicCtx    = new (window.AudioContext||window.webkitAudioContext)({sampleRate:16000});
+    // Fix C (mic side): resume mic context too
+    if(liveMicCtx.state==='suspended') await liveMicCtx.resume();
+
+    const src     = liveMicCtx.createMediaStreamSource(liveMicStream);
+    await liveMicCtx.audioWorklet.addModule(liveGetWorkletURL());
+    liveMicNode   = new AudioWorkletNode(liveMicCtx,'pcm-capture');
+    liveMicNode.port.onmessage = (e)=>{
+      if(!V.on || V.muted) return;
+      // FIX 5: don't send mic audio while Karen is speaking — avoids echo & confusion
+      if(V.speaking) return;
+      if(liveWs?.readyState===WebSocket.OPEN){
+        // FIX 4: fast base64 — chunked apply is ~50x faster than char-by-char loop
+        const bytes = new Uint8Array(e.data);
+        let bin='';
+        const CHUNK=32768;
+        for(let i=0;i<bytes.length;i+=CHUNK)
+          bin+=String.fromCharCode.apply(null, bytes.subarray(i,i+CHUNK));
+        const b64=btoa(bin);
+        liveWs.send(JSON.stringify({realtimeInput:{mediaChunks:[{mimeType:'audio/pcm;rate=16000',data:b64}]}}));
+        if(!V.speaking&&!V.thinking){ V.listening=true; setVState('listening'); }
+      }
+    };
+    src.connect(liveMicNode);
+    // Fix B: do NOT connect liveMicNode to destination — that would echo mic audio to speakers
+    V.listening=true; setVState('listening');
+  }catch(e){
+    toast('Mic error: '+e.message); closeVoice();
+  }
+}
+
+function liveStopMic(){
+  try{ liveMicNode?.disconnect(); liveMicNode=null; }catch{}
+  try{ liveMicCtx?.close(); liveMicCtx=null; }catch{}
+  try{ liveMicStream?.getTracks().forEach(t=>t.stop()); liveMicStream=null; }catch{}
+  V.listening=false;
+}
+
+function livePlayPCM(b64){
+  try{
+    if(!liveOutCtx) return;
+    if(liveOutCtx.state==='suspended') liveOutCtx.resume();
+    const bin=atob(b64);
+    const byteLen=bin.length-(bin.length%2); // must be even for Int16
+    const i16=new Int16Array(byteLen/2);
+    for(let i=0;i<i16.length;i++) i16[i]=(bin.charCodeAt(i*2)&0xff)|((bin.charCodeAt(i*2+1)&0xff)<<8);
+    const f32=new Float32Array(i16.length);
+    for(let i=0;i<i16.length;i++) f32[i]=i16[i]/32768;
+    const buf=liveOutCtx.createBuffer(1,f32.length,24000);
+    buf.copyToChannel(f32,0);
+    const src=liveOutCtx.createBufferSource();
+    src.buffer=buf; src.connect(liveOutCtx.destination);
+    const now=liveOutCtx.currentTime;
+    if(liveNextTime<now+0.02) liveNextTime=now+0.02;
+    src.start(liveNextTime);
+    liveNextTime+=buf.duration;
+  }catch(e){ console.warn('Audio play error',e); }
+}
+
+function closeVoice(){
+  V.on=false; V.restart=false; V.fallback=false;
+  V.listening=false; V.speaking=false; V.thinking=false;
+  // Stop fallback speech recognition if active
+  try{ V.rec?.stop(); V.rec=null; }catch{}
+  // Stop ElevenLabs audio if playing
+  try{ elAudio?.pause(); elAudio=null; }catch{}
+  // Stop fallback TTS if active
+  try{ window.speechSynthesis?.cancel(); }catch{}
+  liveStopMic();
+  try{ liveWs?.close(); liveWs=null; }catch{}
+  try{ liveOutCtx?.close(); liveOutCtx=null; }catch{}
+  liveNextTime=0;
+  g('vov').classList.remove('show','vlistening','vspeaking','vthinking');
+  g('voice-hdr-btn').classList.remove('vactive');
+  toast('Voice mode ended');
+}
+
+function orbClick(){
+  if(!V.on) return;
+  if(V.muted){
+    toggleVMute(); // unmute re-enables mic
+  } else if(V.speaking){
+    V.speaking=false;
+    if(V.fallback){
+      // Fallback mode: cancel TTS and restart listening
+      try{ window.speechSynthesis?.cancel(); }catch{}
+      setVState('listening');
+      if(!V.muted) fallbackListen();
+    } else {
+      // FIX 6: properly cancel all scheduled audio by closing + recreating the output context
+      try{
+        liveOutCtx?.close();
+        liveOutCtx = new (window.AudioContext||window.webkitAudioContext)({sampleRate:24000});
+        liveOutCtx.resume().catch(()=>{});
+      }catch(e){}
+      liveNextTime = 0;
+      // Tell server to stop current turn
+      try{
+        if(liveWs?.readyState===WebSocket.OPEN)
+          liveWs.send(JSON.stringify({clientContent:{turns:[],turnComplete:true}}));
+      }catch{}
+      setVState('listening');
+    }
+  }
+}
+
+// Stub — no-op (Gemini Live handles its own listening loop)
+function vListen(){ /* no-op: mic runs continuously via AudioWorklet */ }
+function vStopListen(){ liveStopMic(); }
+function vStopSpeak(){
+  V.speaking=false;
+  if(V.fallback){ try{ window.speechSynthesis?.cancel(); }catch{} }
+  else{ liveNextTime=0; }
+}
+
+function toggleVMute(){
+  V.muted=!V.muted;
+  const ci=g('vmute-ci'), ic=g('vmute-ic');
+  if(V.muted){
+    ci.classList.add('muted'); ic.textContent='mic_off';
+    if(V.fallback){ try{ V.rec?.stop(); V.rec=null; }catch{}; setVState('thinking'); }
+    else{ liveStopMic(); setVState('thinking'); }
+    toast('Mic muted');
+  }else{
+    ci.classList.remove('muted'); ic.textContent='mic'; toast('Mic active');
+    if(V.fallback){ fallbackListen(); }
+    else{ liveStartMic(); }
+  }
+}
+
+function toggleVSpk(){
+  V.spkOff=!V.spkOff;
+  const ci=g('vspk-ci'), ic=g('vspk-ic');
+  if(V.spkOff){
+    ci.classList.add('muted-spk'); ic.textContent='volume_off';
+    vStopSpeak(); toast('Speaker muted');
+  }else{
+    ci.classList.remove('muted-spk'); ic.textContent='volume_up'; toast('Speaker on');
+  }
+}
+
+/* ══════════════════════════════════════════════
+   FALLBACK VOICE MODE  (Speech API + Gemini REST + TTS)
+   Used automatically when Gemini Live API is unavailable
+══════════════════════════════════════════════ */
+function startFallbackVoice(){
+  if(!V.on) return;
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){ toast('Speech recognition not supported in this browser. Try Chrome.'); closeVoice(); return; }
+  V.fallback=true;
+  setVState('listening');
+  g('vov-status').textContent='Listening… (standard mode)';
+  fallbackListen();
+}
+
+function fallbackListen(){
+  if(!V.on||!V.fallback||V.muted) return;
+  try{ V.rec?.stop(); V.rec=null; }catch{}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR) return;
+  V.rec=new SR(); V.rec.continuous=false; V.rec.interimResults=true; V.rec.lang='en-US';
+  V.rec.onresult=(e)=>{
+    const text=Array.from(e.results).map(r=>r[0].transcript).join('');
+    g('vov-tx').textContent=text; g('vov-tx').className='utx';
+    if(e.results[e.results.length-1].isFinal&&text.trim()){
+      V.rec=null;
+      fallbackRespond(text.trim());
+    }
+  };
+  V.rec.onend=()=>{ if(V.on&&V.fallback&&!V.speaking&&!V.thinking) setTimeout(fallbackListen,300); };
+  V.rec.onerror=(ev)=>{
+    if(ev.error==='not-allowed'){ toast('Mic permission denied'); closeVoice(); return; }
+    if(V.on&&V.fallback) setTimeout(fallbackListen,500);
+  };
+  try{ V.rec.start(); V.listening=true; setVState('listening'); }
+  catch(e){ if(V.on) setTimeout(fallbackListen,600); }
+}
+
+async function fallbackRespond(text){
+  if(!V.on||!V.fallback) return;
+  V.thinking=true; V.listening=false; setVState('thinking');
+  g('vov-tx').textContent=text; g('vov-tx').className='utx';
+  try{
+    const resp=await callGemini(text,[],{voice:true,maxOutputTokens:120});
+    const reply=await readSSE(resp,null,null);
+    if(!V.on||!V.fallback) return;
+    g('vov-tx').textContent=reply.slice(0,130)+(reply.length>130?'…':'');
+    g('vov-tx').className='ktx';
+    V.thinking=false;
+    fallbackSpeak(reply);
+  }catch(e){
+    V.thinking=false;
+    if(V.on&&V.fallback){ toast('Karen error: '+e.message); setVState('listening'); fallbackListen(); }
+  }
+}
+
+/* ══════════════════════════════════════════════
+   ELEVENLABS TTS  (natural female voice)
+   Auto-falls back to browser TTS on any error
+══════════════════════════════════════════════ */
+const EL_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'; // Rachel — natural female voice
+let elAudio = null; // current ElevenLabs Audio element
+
+async function elevenLabsSpeak(text, onEnd){
+  const key = C.elevenLabsKey||'';
+  if(!key){ browserSpeak(text, onEnd); return; }
+  try{
+    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${EL_VOICE_ID}/stream`,{
+      method:'POST',
+      headers:{'xi-api-key':key,'Content-Type':'application/json','Accept':'audio/mpeg'},
+      body:JSON.stringify({
+        text: text.slice(0,5000),
+        model_id:'eleven_multilingual_v2',
+        voice_settings:{stability:0.48,similarity_boost:0.76,style:0.05,use_speaker_boost:true}
+      })
+    });
+    if(!res.ok){
+      // 401 = bad key, 429 = quota exceeded — fall back silently
+      const why = res.status===429 ? 'ElevenLabs limit reached' : res.status===401 ? 'ElevenLabs key invalid' : `ElevenLabs error ${res.status}`;
+      toast(why+' — using browser voice', 3000);
+      browserSpeak(text, onEnd); return;
+    }
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    if(elAudio){ try{ elAudio.pause(); }catch{} }
+    elAudio = new Audio(url);
+    elAudio.onended = ()=>{ URL.revokeObjectURL(url); if(onEnd) onEnd(); };
+    elAudio.onerror = ()=>{ URL.revokeObjectURL(url); toast('ElevenLabs playback failed — using browser voice',2500); browserSpeak(text,onEnd); };
+    elAudio.play().catch(()=>{ URL.revokeObjectURL(url); browserSpeak(text,onEnd); });
+  }catch(e){
+    toast('ElevenLabs unavailable — using browser voice', 2500);
+    browserSpeak(text, onEnd);
+  }
+}
+
+function browserSpeak(text, onEnd){
+  if(!window.speechSynthesis){ if(onEnd) onEnd(); return; }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate  = parseFloat(C.voiceSpeed)||0.95;
+  u.pitch = 1.05;
+  applyVoice(u);
+  u.onend   = ()=>{ if(onEnd) onEnd(); };
+  u.onerror = ()=>{ if(onEnd) onEnd(); };
+  window.speechSynthesis.speak(u);
+}
+
+
+function fallbackSpeak(text){
+  if(!V.on||!V.fallback){ return; }
+  if(V.spkOff){ if(V.on){ setVState('listening'); fallbackListen(); } return; }
+  V.speaking=true; setVState('speaking');
+  try{ elAudio?.pause(); elAudio=null; }catch{}
+  window.speechSynthesis.cancel();
+  const onEnd = ()=>{
+    V.speaking=false;
+    if(V.on&&V.fallback&&!V.muted){ setVState('listening'); fallbackListen(); }
+  };
+  elevenLabsSpeak(text, onEnd);
+}
+
+
+/* ══════════════════════════════════════════════
+   UI HELPERS
+══════════════════════════════════════════════ */
+function showTyp(v){ g('typr').classList[v?'add':'remove']('show'); }
+function setLoad(v){
+  const b=g('send-btn'); b.classList[v?'add':'remove']('ld');
+  b.querySelector('.mi').textContent=v?'sync':'arrow_forward';
+}
+function autoH(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,155)+'px'; }
+function onKey(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMsg(); } }
+function scrollBot(){ const a=g('chat'); requestAnimationFrame(()=>{ a.scrollTop=a.scrollHeight; }); }
+
+/* ══════════════════════════════════════════════
+   KEYBOARD SHORTCUTS
+══════════════════════════════════════════════ */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(V.on){ closeVoice(); return; }
+    if(g('cfg-ov').classList.contains('show')){ closeCfg(); return; }
+    if(sbOpen){ closeSB(); }
+  }
+});
+
+/* ══════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════ */
+function init(){
+  loadAll();
+  g('hdr-name').textContent = C.name||'Karen AI';
+  g('em-name').textContent  = C.name||'Karen AI';
+
+  // Desktop: keep sidebar always visible
+  if(window.innerWidth>=640){
+    g('sb').style.cssText='position:relative;transform:none';
+    g('sbo').style.display='none';
+  }
+
+  renderList();
+
+  // Entrance animation
+  setTimeout(()=>{
+    ['.em-orb','.em-h','.em-n','.em-s','.em-vc'].forEach((sel,i)=>{
+      const el=document.querySelector(sel); if(!el)return;
+      el.style.opacity='0'; el.style.transform='translateY(13px)';
+      el.style.transition=`opacity .5s ease ${i*.09}s, transform .5s ease ${i*.09}s`;
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        el.style.opacity='1'; el.style.transform='translateY(0)';
+      }));
+    });
+  },70);
+}
+
+init();
+
+/* ══════════════════════════════════════════════
+   ICON FALLBACK — runs if Material Icons CDN fails
+══════════════════════════════════════════════ */
+(function(){
+  const emojiMap={
+    smart_toy:'🤖', menu:'☰', close:'✕', add:'+', chat_bubble_outline:'💬',
+    delete_outline:'🗑', settings:'⚙', record_voice_over:'🎙', tune:'🎛',
+    arrow_forward:'→', add_photo_alternate:'📷', mic:'🎤', mic_off:'🚫',
+    volume_up:'🔊', volume_off:'🔇', call_end:'📵', sync:'↻', refresh:'↺',
+    visibility:'👁', visibility_off:'🙈', check:'✓', code:'</>',
+    warning:'⚠', download:'⬇', content_copy:'📋', edit:'✏', image:'🖼',
+    chat:'💬', settings_backup_restore:'↺'
+  };
+  // Test if Material Icons font loaded by checking rendered width of a known icon
+  function iconsLoaded(){
+    const t=document.createElement('span');
+    t.className='material-icons-round';
+    t.style.cssText='position:absolute;visibility:hidden;font-size:24px';
+    t.textContent='check';
+    document.body.appendChild(t);
+    const w=t.offsetWidth;
+    document.body.removeChild(t);
+    // A loaded icon renders as a single glyph (~24px wide); raw text "check" is wider
+    return w>0 && w<=32;
+  }
+  function applyEmojiIcons(){
+    document.querySelectorAll('.mi,.material-icons-round').forEach(el=>{
+      const name=(el.textContent||'').trim();
+      if(emojiMap[name]){
+        el.textContent=emojiMap[name];
+        el.style.fontFamily='inherit';
+        el.style.fontSize='1.1em';
+        el.style.fontStyle='normal';
+      }
+    });
+    // Also watch for dynamically added icons
+    new MutationObserver(muts=>{
+      muts.forEach(m=>m.addedNodes.forEach(n=>{
+        if(n.nodeType!==1)return;
+        const els=n.classList?.contains('mi')?[n]:[...n.querySelectorAll('.mi,.material-icons-round')];
+        els.forEach(el=>{
+          const name=(el.textContent||'').trim();
+          if(emojiMap[name]){ el.textContent=emojiMap[name]; el.style.fontFamily='inherit'; el.style.fontSize='1.1em'; }
+        });
+      }));
+    }).observe(document.body,{childList:true,subtree:true});
+  }
+  // Wait 2.5s for fonts to load, then check
+  setTimeout(()=>{ if(!iconsLoaded()) applyEmojiIcons(); }, 2500);
+})();
+</script>
+
+<!-- Added Snippet -->
+<input id="input" placeholder="Ask something..." />
+<button onclick="sendMessage()">Send</button>
+<p id="output"></p>
+
+<script>
+async function sendMessage() {
+  const input = document.getElementById("input").value;
+
+  const res = await fetch(`/api/chat?q=${input}`);
+  const data = await res.json();
+
+  document.getElementById("output").innerText = data.answer;
+}
+</script>
+
+</body>
+</html>
